@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f8fa" />
+    <title>A1 Paper Trading</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div id="login" class="login-shell hidden">
+      <form id="login-form" class="login-card">
+        <div class="brand-mark">A1</div>
+        <p class="eyebrow">PRIVATE DASHBOARD</p>
+        <h1>Paper trading, clearly.</h1>
+        <p class="muted">Sign in with the password stored in your local <code>.env</code> file.</p>
+        <label>Password<input id="password" type="password" autocomplete="current-password" required /></label>
+        <button class="primary" type="submit">Sign in</button>
+        <p id="login-error" class="error" role="alert"></p>
+      </form>
+    </div>
+
+    <div id="app" class="hidden">
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark small">A1</span><span>Trading Console</span></div>
+        <div class="top-actions">
+          <span class="paper-badge">PAPER ONLY</span>
+          <button id="refresh" class="quiet">Refresh</button>
+          <button id="logout" class="quiet">Sign out</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero panel">
+          <div>
+            <p class="eyebrow">AUTOMATED SWING STRATEGY</p>
+            <h1 id="bot-title">Paper bot paused</h1>
+            <p id="bot-subtitle" class="muted">Connect your Alpaca paper account to begin.</p>
+          </div>
+          <div class="control-row">
+            <button id="test" class="secondary">Test connection</button>
+            <button id="start" class="primary">Start bot</button>
+            <button id="pause" class="secondary">Pause</button>
+            <button id="run-now" class="secondary">Run now</button>
+            <button id="emergency" class="danger">Emergency stop</button>
+          </div>
+        </section>
+
+        <div id="notice" class="notice hidden" role="status"></div>
+
+        <section class="metric-grid">
+          <article class="metric panel"><span>Account equity</span><strong id="equity">—</strong><small id="equity-note">Alpaca paper</small></article>
+          <article class="metric panel"><span>Cash</span><strong id="cash">—</strong><small>Margin is not used</small></article>
+          <article class="metric panel"><span>Open positions</span><strong id="position-count">0</strong><small id="slots">of 4 allowed</small></article>
+          <article class="metric panel"><span>Market</span><strong id="market">—</strong><small id="market-next">Regular hours only</small></article>
+        </section>
+
+        <section class="two-column">
+          <article class="panel chart-panel">
+            <div class="section-heading"><div><p class="eyebrow">PERFORMANCE</p><h2>Virtual $2,000 allocation</h2></div><span id="history-range" class="muted">No data yet</span></div>
+            <canvas id="equity-chart" height="240" aria-label="Virtual equity history"></canvas>
+          </article>
+          <article class="panel risk-panel">
+            <div class="section-heading"><div><p class="eyebrow">SAFETY</p><h2>Risk guardrails</h2></div><button id="open-settings" class="quiet">Edit</button></div>
+            <div class="risk-list">
+              <div><span>Daily loss halt</span><strong id="daily-limit">3%</strong></div>
+              <div><span>Maximum drawdown</span><strong id="drawdown-limit">10%</strong></div>
+              <div><span>Risk per trade</span><strong id="trade-risk">1%</strong></div>
+              <div><span>Maximum position</span><strong id="position-limit">20%</strong></div>
+            </div>
+            <p class="fine-print">Protective exits are checked every 15 minutes in this paper-only baseline. Native broker-side protection is required before any future live phase.</p>
+          </article>
+        </section>
+
+        <section class="panel table-panel">
+          <div class="section-heading"><div><p class="eyebrow">PORTFOLIO</p><h2>Open positions</h2></div></div>
+          <div class="table-scroll"><table><thead><tr><th>Symbol</th><th>Quantity</th><th>Entry</th><th>Price</th><th>Market value</th><th>P/L</th></tr></thead><tbody id="positions"><tr><td colspan="6" class="empty">No open positions</td></tr></tbody></table></div>
+        </section>
+
+        <section class="two-column lower">
+          <article class="panel table-panel">
+            <div class="section-heading"><div><p class="eyebrow">DECISIONS</p><h2>Latest signals</h2></div></div>
+            <div id="signals" class="feed"><p class="empty">Signals will appear after the first market cycle.</p></div>
+          </article>
+          <article class="panel table-panel">
+            <div class="section-heading"><div><p class="eyebrow">ACTIVITY</p><h2>Bot events</h2></div></div>
+            <div id="events" class="feed"><p class="empty">No events yet.</p></div>
+          </article>
+        </section>
+
+        <section class="panel backtest-panel">
+          <div><p class="eyebrow">RESEARCH</p><h2>Historical backtest</h2><p class="muted">Uses the same rules, free IEX hourly data, and a configurable slippage estimate.</p></div>
+          <div class="control-row">
+            <button id="report" class="secondary">Download monthly report</button>
+            <button id="backtest" class="secondary">Run 6-month backtest</button>
+          </div>
+          <div id="backtest-results" class="backtest-results hidden"></div>
+        </section>
+      </main>
+
+      <dialog id="settings-dialog">
+        <form id="settings-form" method="dialog">
+          <div class="section-heading"><div><p class="eyebrow">CONFIGURATION</p><h2>Trading and risk</h2></div><button id="close-settings" class="icon-button" type="button" aria-label="Close">×</button></div>
+          <p class="fine-print">Changes take effect on the next cycle. Keep limits conservative while learning.</p>
+          <div class="form-grid">
+            <label class="wide">Watchlist (comma separated)<input name="watchlist" /></label>
+            <label>Capital cap ($)<input name="capital_cap" type="number" min="100" step="100" /></label>
+            <label>Check interval (minutes)<input name="evaluation_minutes" type="number" min="5" /></label>
+            <label>Maximum positions<input name="max_positions" type="number" min="1" max="20" /></label>
+            <label>Maximum position (%)<input name="max_position_pct" type="number" min="2" max="50" step="1" /></label>
+            <label>Risk per trade (%)<input name="risk_per_trade_pct" type="number" min="0.1" max="5" step="0.1" /></label>
+            <label>Daily loss halt (%)<input name="max_daily_loss_pct" type="number" min="0.5" max="10" step="0.5" /></label>
+            <label>Drawdown halt (%)<input name="max_drawdown_pct" type="number" min="2" max="30" step="1" /></label>
+            <label>Stop distance (ATR)<input name="stop_atr_multiple" type="number" min="0.5" max="5" step="0.25" /></label>
+            <label>Profit target (ATR)<input name="target_atr_multiple" type="number" min="1" max="10" step="0.25" /></label>
+            <label>Minimum hold (hours)<input name="min_hold_hours" type="number" min="0" /></label>
+            <label>Backtest slippage (bps)<input name="slippage_bps" type="number" min="0" max="100" step="0.5" /></label>
+          </div>
+          <div class="dialog-actions"><button id="cancel-settings" class="secondary" type="button">Cancel</button><button class="primary" type="submit">Save settings</button></div>
+        </form>
+      </dialog>
+    </div>
+
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
+
